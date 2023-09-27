@@ -9,6 +9,7 @@ from tqdm import tqdm
 BASE_URL = "https://api.ultradns.com"
 HEADERS = {"Content-Type": "application/json"}
 
+
 def get_primary_token(username=None, password=None, token=None):
     if token:
         return token
@@ -122,11 +123,20 @@ def main(username=None, password=None, token=None, output_file=None, format="jso
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="UltraDNS Subaccounts Zones and Pools Finder")
-    auth_group = parser.add_mutually_exclusive_group(required=True)
+    
+    parser.add_argument("--token", help="Directly pass the Bearer token")
+    
+    auth_group = parser.add_argument_group('authentication', 'Username and Password for authentication')
     auth_group.add_argument("--username", help="Username for authentication")
     auth_group.add_argument("--password", help="Password for authentication")
-    auth_group.add_argument("--token", help="Directly pass the Bearer token")
+    
     parser.add_argument("--output-file", help="Output file name. If not provided, prints to terminal.")
     parser.add_argument("--format", choices=["json", "csv"], default="json", help="Output format: 'json' or 'csv'. Default is 'json'.")
+    
     args = parser.parse_args()
+    
+    if args.token is None:
+        if args.username is None or args.password is None:
+            parser.error("When token is not provided, both username and password are required")
+    
     main(username=args.username, password=args.password, token=args.token, output_file=args.output_file, format=args.format)
